@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cube Timer</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app" id="app">
+        <!-- Header -->
+        <header class="header">
+            <h1 class="logo">Cube Timer</h1>
+            <div class="header-controls">
+                <select id="puzzleType" class="puzzle-select">
+                    <option value="333">3x3x3</option>
+                    <option value="222">2x2x2</option>
+                    <option value="444">4x4x4</option>
+                    <option value="555">5x5x5</option>
+                </select>
+                <button id="settingsBtn" class="icon-btn" title="設定">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"></path>
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- Scramble Section -->
+        <section class="scramble-section">
+            <div class="scramble-container">
+                <p class="scramble-text" id="scramble">R U R' U' R' F R2 U' R' U' R U R' F'</p>
+                <button id="newScrambleBtn" class="new-scramble-btn" title="新しいスクランブル">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M23 4v6h-6M1 20v-6h6"></path>
+                        <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"></path>
+                    </svg>
+                </button>
+            </div>
+        </section>
+
+        <!-- Timer Section -->
+        <main class="timer-section">
+            <div class="timer-container">
+                <div class="inspection-indicator" id="inspectionIndicator">
+                    <span class="inspection-time" id="inspectionTime">15</span>
+                </div>
+                <div class="timer-display" id="timerDisplay">
+                    <span class="timer-state-indicator" id="stateIndicator"></span>
+                    <span class="timer-time" id="timerTime">0.00</span>
+                </div>
+                <p class="timer-hint" id="timerHint">スペースキーを長押しして開始</p>
+            </div>
+        </main>
+
+        <!-- Statistics Section -->
+        <section class="stats-section">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <span class="stat-label">ベスト</span>
+                    <span class="stat-value" id="statBest">-</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">ao5</span>
+                    <span class="stat-value" id="statAo5">-</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">ao12</span>
+                    <span class="stat-value" id="statAo12">-</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">平均</span>
+                    <span class="stat-value" id="statAvg">-</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">回数</span>
+                    <span class="stat-value" id="statCount">0</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Times List Section -->
+        <section class="times-section">
+            <div class="times-header">
+                <h2 class="times-title">タイム一覧</h2>
+                <div class="times-actions">
+                    <button id="clearSessionBtn" class="action-btn danger" title="セッションをクリア">クリア</button>
+                </div>
+            </div>
+            <div class="times-list" id="timesList">
+                <p class="no-times">まだタイムがありません</p>
+            </div>
+        </section>
+
+        <!-- Settings Modal -->
+        <div class="modal" id="settingsModal">
+            <div class="modal-backdrop" id="modalBackdrop"></div>
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>設定</h2>
+                    <button id="closeSettingsBtn" class="close-btn">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="setting-item">
+                        <label class="setting-label">
+                            <input type="checkbox" id="inspectionEnabled" checked>
+                            インスペクション（15秒）を使用
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <label class="setting-label">
+                            <input type="checkbox" id="hideUIWhenTiming">
+                            計測中にUIを非表示
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <label class="setting-label">
+                            ホールド時間
+                            <select id="holdTime" class="setting-select">
+                                <option value="0">なし</option>
+                                <option value="300" selected>0.3秒</option>
+                                <option value="500">0.5秒</option>
+                                <option value="1000">1秒</option>
+                            </select>
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <label class="setting-label">
+                            テーマ
+                            <select id="themeSelect" class="setting-select">
+                                <option value="dark">ダーク</option>
+                                <option value="light">ライト</option>
+                            </select>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
