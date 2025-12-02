@@ -4,7 +4,1040 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cube Timer</title>
-    <link rel="stylesheet" href="style.css">
+    <style>
+/* Modern Font Import */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+/* CSS Variables */
+:root {
+    --bg-primary: #0f0f0f;
+    --bg-secondary: #1a1a1a;
+    --bg-tertiary: #252525;
+    --text-primary: #ffffff;
+    --text-secondary: #a0a0a0;
+    --text-muted: #666666;
+    --accent: #4ade80;
+    --accent-hover: #22c55e;
+    --warning: #fbbf24;
+    --danger: #ef4444;
+    --border: #333333;
+    --timer-ready: #4ade80;
+    --timer-running: #ffffff;
+    --timer-inspection: #fbbf24;
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+    --radius: 8px;
+    --radius-lg: 12px;
+
+    /* Enhanced gradient variables */
+    --accent-gradient: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
+    --accent-glow: rgba(74, 222, 128, 0.2);
+    --accent-soft: rgba(74, 222, 128, 0.1);
+
+    /* Enhanced background variations */
+    --bg-overlay: rgba(26, 26, 26, 0.6);
+    --bg-elevated: #222222;
+
+    /* Enhanced shadow system */
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.2);
+    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.25);
+    --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.3);
+    --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.4);
+    --shadow-accent: 0 4px 24px rgba(74, 222, 128, 0.15);
+    --shadow-accent-lg: 0 8px 32px rgba(74, 222, 128, 0.2);
+
+    /* Glow effects */
+    --glow-sm: 0 0 16px rgba(74, 222, 128, 0.3);
+    --glow-md: 0 0 32px rgba(74, 222, 128, 0.4);
+    --glow-lg: 0 0 48px rgba(74, 222, 128, 0.5);
+
+    /* Border enhancements */
+    --border-elevated: rgba(255, 255, 255, 0.1);
+    --border-accent: rgba(74, 222, 128, 0.3);
+}
+
+[data-theme="light"] {
+    --bg-primary: #f5f5f5;
+    --bg-secondary: #ffffff;
+    --bg-tertiary: #e5e5e5;
+    --text-primary: #171717;
+    --text-secondary: #525252;
+    --text-muted: #a3a3a3;
+    --border: #d4d4d4;
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+
+    --bg-overlay: rgba(255, 255, 255, 0.7);
+    --bg-elevated: #fafafa;
+    --border-elevated: rgba(0, 0, 0, 0.08);
+    --border-accent: rgba(74, 222, 128, 0.4);
+    --accent-glow: rgba(74, 222, 128, 0.15);
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
+    --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.15);
+    --shadow-accent: 0 4px 24px rgba(74, 222, 128, 0.1);
+}
+
+/* Reset & Base */
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    font-size: 16px;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    min-height: 100vh;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    position: relative;
+    overflow-x: hidden;
+}
+
+body::before {
+    content: '';
+    position: fixed;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle at 20% 50%, rgba(74, 222, 128, 0.03) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(34, 197, 94, 0.02) 0%, transparent 50%);
+    animation: backgroundShift 20s ease-in-out infinite alternate;
+    pointer-events: none;
+    z-index: 0;
+}
+
+@keyframes backgroundShift {
+    from { transform: translate(0, 0) rotate(0deg); }
+    to { transform: translate(-5%, -5%) rotate(5deg); }
+}
+
+/* App Container */
+.app {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 1rem;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    z-index: 1;
+    animation: fadeInUp 0.4s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.app.timing-mode .header,
+.app.timing-mode .scramble-section,
+.app.timing-mode .stats-section,
+.app.timing-mode .times-section {
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(0.98);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Header */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 0;
+    margin-bottom: 1.5rem;
+    transition: opacity 0.2s ease;
+    position: relative;
+}
+
+.header::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent 0%, var(--border-elevated) 20%, var(--border-elevated) 80%, transparent 100%);
+}
+
+.logo {
+    font-size: 1.5rem;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    background: var(--accent-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.header-controls {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.puzzle-select {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+    backdrop-filter: blur(10px);
+    color: var(--text-primary);
+    border: 1px solid var(--border-elevated);
+    padding: 0.625rem 1.125rem;
+    border-radius: 12px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    outline: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.puzzle-select:hover,
+.puzzle-select:focus {
+    border-color: var(--border-accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+    transform: translateY(-1px);
+}
+
+.icon-btn {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+    border: 1px solid var(--border-elevated);
+    color: var(--text-secondary);
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.icon-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--accent-gradient);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.icon-btn svg {
+    position: relative;
+    z-index: 1;
+}
+
+.icon-btn:hover {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: var(--shadow-accent);
+    border-color: var(--border-accent);
+    color: var(--accent);
+}
+
+.icon-btn:hover::before {
+    opacity: 0.1;
+}
+
+/* Scramble Section */
+.scramble-section {
+    margin-bottom: 2rem;
+    transition: opacity 0.2s ease;
+}
+
+.scramble-container {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    padding: 1.5rem 1.5rem;
+    border-radius: 16px;
+    border: 1px solid var(--border-elevated);
+    box-shadow: var(--shadow-lg), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.scramble-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+}
+
+.scramble-container:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-xl), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    border-color: var(--border-accent);
+}
+
+.scramble-text {
+    flex: 1;
+    font-family: 'SF Mono', 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
+    font-size: 1.125rem;
+    font-weight: 600;
+    letter-spacing: 0.8px;
+    word-spacing: 6px;
+    line-height: 1.8;
+    background: linear-gradient(135deg, var(--text-primary) 0%, var(--text-secondary) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    user-select: all;
+}
+
+.new-scramble-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 0.625rem;
+    border-radius: 10px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.new-scramble-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--accent-gradient);
+    border-radius: 10px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.new-scramble-btn svg {
+    position: relative;
+    z-index: 1;
+}
+
+.new-scramble-btn:hover {
+    color: var(--accent);
+    transform: rotate(180deg) scale(1.1);
+}
+
+.new-scramble-btn:hover::before {
+    opacity: 0.15;
+}
+
+/* Timer Section */
+.timer-section {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 0;
+    user-select: none;
+}
+
+.timer-container {
+    text-align: center;
+    width: 100%;
+    position: relative;
+}
+
+.inspection-indicator {
+    display: none;
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    border-radius: 16px;
+    background: linear-gradient(135deg, rgba(251, 191, 36, 0.1) 0%, rgba(245, 158, 11, 0.05) 100%);
+    backdrop-filter: blur(10px);
+}
+
+.inspection-indicator.active {
+    display: block;
+    animation: inspectionAppear 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes inspectionAppear {
+    from {
+        opacity: 0;
+        transform: scale(0.9) translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.inspection-time {
+    font-size: 3rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--warning) 0%, #f59e0b 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 0 24px var(--warning));
+    font-variant-numeric: tabular-nums;
+    animation: inspectionPulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes inspectionPulse {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.7;
+        transform: scale(1.05);
+    }
+}
+
+.timer-display {
+    position: relative;
+    display: inline-block;
+    padding: 2rem 3rem;
+    background: radial-gradient(circle at center, rgba(255, 255, 255, 0.03) 0%, transparent 70%);
+    border-radius: 24px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.timer-display.ready {
+    background: radial-gradient(circle at center, var(--accent-soft) 0%, transparent 70%);
+}
+
+.timer-display.running {
+    animation: timerPulse 2s ease-in-out infinite;
+}
+
+@keyframes timerPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+}
+
+.timer-state-indicator {
+    position: absolute;
+    left: -40px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: transparent;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.timer-display.ready .timer-state-indicator {
+    background: var(--accent);
+    box-shadow: 0 0 24px var(--accent), 0 0 48px var(--accent-glow);
+    animation: indicatorPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes indicatorPulse {
+    0%, 100% {
+        transform: translateY(-50%) scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: translateY(-50%) scale(1.3);
+        opacity: 0.7;
+    }
+}
+
+.timer-display.holding .timer-time {
+    color: var(--warning);
+}
+
+.timer-display.ready .timer-time {
+    background: var(--accent-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 0 32px var(--accent-glow));
+    transform: scale(1.05);
+}
+
+.timer-display.running .timer-time {
+    filter: drop-shadow(0 0 48px rgba(255, 255, 255, 0.3));
+}
+
+.timer-display.inspection .timer-time {
+    color: var(--timer-inspection);
+}
+
+.timer-time {
+    font-size: clamp(4rem, 15vw, 8rem);
+    font-weight: 900;
+    letter-spacing: -0.05em;
+    background: linear-gradient(180deg, var(--text-primary) 0%, var(--text-secondary) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 4px 24px rgba(0, 0, 0, 0.3));
+    font-variant-numeric: tabular-nums;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.timer-hint {
+    margin-top: 1.5rem;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+}
+
+.timer-display.running + .timer-hint,
+.timer-display.inspection + .timer-hint {
+    opacity: 0;
+}
+
+/* Stats Section */
+.stats-section {
+    margin-bottom: 1.5rem;
+    transition: opacity 0.2s ease;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0.75rem;
+}
+
+@media (max-width: 600px) {
+    .stats-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+.stat-card {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--border-elevated);
+    border-radius: 12px;
+    padding: 1rem 0.875rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--accent-gradient);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 0;
+}
+
+.stat-card:hover {
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: var(--shadow-accent-lg);
+    border-color: var(--border-accent);
+}
+
+.stat-card:hover::before {
+    opacity: 0.08;
+}
+
+.stat-card:nth-child(1) { animation: fadeInScale 0.4s ease-out 0.05s backwards; }
+.stat-card:nth-child(2) { animation: fadeInScale 0.4s ease-out 0.10s backwards; }
+.stat-card:nth-child(3) { animation: fadeInScale 0.4s ease-out 0.15s backwards; }
+.stat-card:nth-child(4) { animation: fadeInScale 0.4s ease-out 0.20s backwards; }
+.stat-card:nth-child(5) { animation: fadeInScale 0.4s ease-out 0.25s backwards; }
+
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: scale(0.9) translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.stat-label {
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 0.25rem;
+    position: relative;
+    z-index: 1;
+}
+
+.stat-value {
+    display: block;
+    font-size: 1.25rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-primary);
+    position: relative;
+    z-index: 1;
+}
+
+.stat-value.pb {
+    background: var(--accent-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 800;
+    text-shadow: 0 0 24px var(--accent-glow);
+}
+
+/* Times Section */
+.times-section {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--border-elevated);
+    border-radius: 16px;
+    padding: 1.25rem;
+    max-height: 350px;
+    box-shadow: var(--shadow-md);
+    display: flex;
+    flex-direction: column;
+    transition: all 0.3s ease;
+}
+
+.times-section:hover {
+    box-shadow: var(--shadow-lg);
+}
+
+.times-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-elevated);
+}
+
+.times-title {
+    font-size: 1.125rem;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+}
+
+.times-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.action-btn {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.02) 100%);
+    border: 1px solid var(--border-elevated);
+    color: var(--text-secondary);
+    padding: 0.5rem 1rem;
+    border-radius: 10px;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    color: var(--text-primary);
+    border-color: var(--border-accent);
+}
+
+.action-btn.danger:hover {
+    background: var(--danger);
+    border-color: var(--danger);
+    color: white;
+    box-shadow: 0 4px 16px rgba(239, 68, 68, 0.3);
+}
+
+.times-list {
+    flex: 1;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--accent) transparent;
+}
+
+.times-list::-webkit-scrollbar {
+    width: 8px;
+}
+
+.times-list::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.times-list::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, var(--accent) 0%, var(--accent-hover) 100%);
+    border-radius: 4px;
+    transition: background 0.2s ease;
+}
+
+.times-list::-webkit-scrollbar-thumb:hover {
+    background: var(--accent);
+    box-shadow: 0 0 8px var(--accent-glow);
+}
+
+.no-times {
+    color: var(--text-muted);
+    text-align: center;
+    padding: 2rem;
+    font-size: 0.875rem;
+}
+
+.time-item {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 0.5rem;
+    border-radius: 8px;
+    border-bottom: none;
+    margin-bottom: 0.25rem;
+    gap: 0.875rem;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+.time-item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--accent-gradient);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    border-radius: 2px;
+}
+
+.time-item:hover {
+    background: rgba(255, 255, 255, 0.03);
+    transform: translateX(4px);
+}
+
+.time-item:hover::before {
+    opacity: 1;
+}
+
+.time-index {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    min-width: 2.5rem;
+}
+
+.time-value {
+    flex: 1;
+    font-weight: 700;
+    font-size: 1.05rem;
+    letter-spacing: -0.3px;
+    font-variant-numeric: tabular-nums;
+}
+
+.time-value.dnf {
+    color: var(--danger);
+    text-decoration: line-through;
+}
+
+.time-value.plus2 {
+    color: var(--warning);
+}
+
+.time-penalty {
+    font-size: 0.75rem;
+    color: var(--warning);
+}
+
+.time-actions {
+    display: flex;
+    gap: 0.25rem;
+}
+
+.time-action-btn {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid transparent;
+    color: var(--text-muted);
+    font-size: 0.625rem;
+    font-weight: 600;
+    padding: 0.375rem 0.5rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.time-action-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-primary);
+    border-color: var(--border-elevated);
+    transform: translateY(-1px) scale(1.05);
+}
+
+.time-action-btn.active {
+    background: linear-gradient(135deg, var(--warning) 0%, #f59e0b 100%);
+    color: #000;
+    border-color: var(--warning);
+    font-weight: 700;
+    box-shadow: 0 2px 8px rgba(251, 191, 36, 0.3);
+}
+
+.time-action-btn.delete:hover {
+    background: linear-gradient(135deg, var(--danger) 0%, #dc2626 100%);
+    border-color: var(--danger);
+    color: white;
+    box-shadow: 0 2px 12px rgba(239, 68, 68, 0.4);
+}
+
+/* Modal */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal.active {
+    display: flex;
+}
+
+.modal-backdrop {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.modal-content {
+    position: relative;
+    background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
+    border: 1px solid var(--border-elevated);
+    border-radius: 20px;
+    width: 90%;
+    max-width: 440px;
+    box-shadow: var(--shadow-xl);
+    animation: modalSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+}
+
+.modal-content::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--accent-gradient);
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 1.5rem;
+    border-bottom: 1px solid var(--border-elevated);
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.modal-header h2 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+}
+
+.close-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 1.5rem;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0.25rem;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.close-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+    transform: rotate(90deg);
+}
+
+.modal-body {
+    padding: 1.5rem;
+}
+
+.setting-item {
+    margin-bottom: 1.25rem;
+    padding: 0.75rem;
+    border-radius: 10px;
+    transition: background 0.2s ease;
+}
+
+.setting-item:hover {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.setting-item:last-child {
+    margin-bottom: 0;
+}
+
+.setting-label {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.875rem;
+    color: var(--text-primary);
+    cursor: pointer;
+}
+
+.setting-label input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--accent);
+    cursor: pointer;
+}
+
+.setting-select {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+    padding: 0.5rem;
+    border-radius: var(--radius);
+    font-size: 0.875rem;
+    cursor: pointer;
+    margin-left: auto;
+}
+
+/* Touch support */
+@media (hover: none) and (pointer: coarse) {
+    .timer-section {
+        cursor: pointer;
+    }
+
+    .timer-hint {
+        content: 'タップして長押しで開始';
+    }
+}
+
+/* Mobile responsive enhancements */
+@media (max-width: 600px) {
+    .app {
+        padding: 0.75rem;
+    }
+
+    .scramble-container {
+        padding: 1.25rem 1rem;
+    }
+
+    .stat-card {
+        padding: 0.875rem 0.625rem;
+        animation: none;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-2px);
+    }
+
+    .timer-display {
+        padding: 1rem 1.5rem;
+    }
+
+    .timer-state-indicator {
+        left: -24px;
+        width: 12px;
+        height: 12px;
+    }
+}
+
+@media (max-width: 400px) {
+    .logo {
+        font-size: 1.25rem;
+    }
+
+    .puzzle-select {
+        font-size: 0.8125rem;
+        padding: 0.5rem 0.875rem;
+    }
+
+    .icon-btn {
+        width: 40px;
+        height: 40px;
+    }
+}
+
+/* Animations */
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+.inspection-time {
+    animation: pulse 1s ease-in-out infinite;
+}
+
+/* Focus styles */
+*:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+    border-radius: 8px;
+    box-shadow: 0 0 0 4px var(--accent-soft);
+}
+
+button:focus-visible {
+    outline-offset: 2px;
+}
+
+/* Print styles */
+@media print {
+    .header-controls,
+    .times-actions,
+    .time-actions,
+    .modal {
+        display: none !important;
+    }
+}
+    </style>
 </head>
 <body>
     <div class="app" id="app">
@@ -139,6 +1172,660 @@
         </div>
     </div>
 
-    <script src="app.js"></script>
+    <script>
+// Cube Timer Application
+(function() {
+    'use strict';
+
+    // ============================================
+    // State
+    // ============================================
+    const state = {
+        times: [],
+        currentPuzzle: '333',
+        settings: {
+            inspectionEnabled: true,
+            hideUIWhenTiming: false,
+            holdTime: 300,
+            theme: 'dark'
+        },
+        timer: {
+            state: 'idle', // idle, holding, ready, inspection, running
+            startTime: null,
+            elapsed: 0,
+            holdStartTime: null,
+            inspectionStartTime: null,
+            animationFrame: null
+        }
+    };
+
+    // ============================================
+    // DOM Elements
+    // ============================================
+    const elements = {
+        app: document.getElementById('app'),
+        timerDisplay: document.getElementById('timerDisplay'),
+        timerTime: document.getElementById('timerTime'),
+        timerHint: document.getElementById('timerHint'),
+        stateIndicator: document.getElementById('stateIndicator'),
+        inspectionIndicator: document.getElementById('inspectionIndicator'),
+        inspectionTime: document.getElementById('inspectionTime'),
+        scramble: document.getElementById('scramble'),
+        newScrambleBtn: document.getElementById('newScrambleBtn'),
+        puzzleType: document.getElementById('puzzleType'),
+        timesList: document.getElementById('timesList'),
+        clearSessionBtn: document.getElementById('clearSessionBtn'),
+        settingsBtn: document.getElementById('settingsBtn'),
+        settingsModal: document.getElementById('settingsModal'),
+        modalBackdrop: document.getElementById('modalBackdrop'),
+        closeSettingsBtn: document.getElementById('closeSettingsBtn'),
+        inspectionEnabled: document.getElementById('inspectionEnabled'),
+        hideUIWhenTiming: document.getElementById('hideUIWhenTiming'),
+        holdTime: document.getElementById('holdTime'),
+        themeSelect: document.getElementById('themeSelect'),
+        statBest: document.getElementById('statBest'),
+        statAo5: document.getElementById('statAo5'),
+        statAo12: document.getElementById('statAo12'),
+        statAvg: document.getElementById('statAvg'),
+        statCount: document.getElementById('statCount')
+    };
+
+    // ============================================
+    // Scramble Generator
+    // ============================================
+    const scrambleGenerator = {
+        moves: {
+            '222': ['R', 'U', 'F'],
+            '333': ['R', 'L', 'U', 'D', 'F', 'B'],
+            '444': ['R', 'L', 'U', 'D', 'F', 'B', 'Rw', 'Lw', 'Uw', 'Dw', 'Fw', 'Bw'],
+            '555': ['R', 'L', 'U', 'D', 'F', 'B', 'Rw', 'Lw', 'Uw', 'Dw', 'Fw', 'Bw']
+        },
+        modifiers: ['', "'", '2'],
+        lengths: {
+            '222': 9,
+            '333': 20,
+            '444': 40,
+            '555': 60
+        },
+
+        getOpposite(move) {
+            const opposites = {
+                'R': 'L', 'L': 'R',
+                'U': 'D', 'D': 'U',
+                'F': 'B', 'B': 'F',
+                'Rw': 'Lw', 'Lw': 'Rw',
+                'Uw': 'Dw', 'Dw': 'Uw',
+                'Fw': 'Bw', 'Bw': 'Fw'
+            };
+            return opposites[move] || null;
+        },
+
+        getAxis(move) {
+            const baseMove = move.replace('w', '');
+            if (['R', 'L', 'Rw', 'Lw'].includes(move)) return 'x';
+            if (['U', 'D', 'Uw', 'Dw'].includes(move)) return 'y';
+            if (['F', 'B', 'Fw', 'Bw'].includes(move)) return 'z';
+            return null;
+        },
+
+        generate(puzzle) {
+            const moves = this.moves[puzzle] || this.moves['333'];
+            const length = this.lengths[puzzle] || 20;
+            const scramble = [];
+            let lastMove = null;
+            let lastAxis = null;
+
+            for (let i = 0; i < length; i++) {
+                let move;
+                let attempts = 0;
+
+                do {
+                    move = moves[Math.floor(Math.random() * moves.length)];
+                    attempts++;
+                } while (
+                    attempts < 20 && (
+                        move === lastMove ||
+                        (lastMove && this.getOpposite(move) === lastMove && this.getAxis(move) === lastAxis)
+                    )
+                );
+
+                const modifier = this.modifiers[Math.floor(Math.random() * this.modifiers.length)];
+                scramble.push(move + modifier);
+                lastMove = move;
+                lastAxis = this.getAxis(move);
+            }
+
+            return scramble.join(' ');
+        }
+    };
+
+    // ============================================
+    // Timer Functions
+    // ============================================
+    function formatTime(ms, showMillis = true) {
+        if (ms === Infinity || ms === -Infinity || isNaN(ms)) return 'DNF';
+
+        const totalSeconds = Math.floor(ms / 1000);
+        const minutes = Math.floor(totalSeconds / 60);
+        const seconds = totalSeconds % 60;
+        const centiseconds = Math.floor((ms % 1000) / 10);
+
+        if (minutes > 0) {
+            return `${minutes}:${seconds.toString().padStart(2, '0')}.${centiseconds.toString().padStart(2, '0')}`;
+        }
+        return `${seconds}.${centiseconds.toString().padStart(2, '0')}`;
+    }
+
+    function updateTimerDisplay(time) {
+        elements.timerTime.textContent = formatTime(time);
+    }
+
+    function setTimerState(newState) {
+        state.timer.state = newState;
+        elements.timerDisplay.className = 'timer-display ' + newState;
+
+        switch (newState) {
+            case 'idle':
+                elements.timerHint.textContent = 'スペースキーを長押しして開始';
+                elements.inspectionIndicator.classList.remove('active');
+                break;
+            case 'holding':
+                elements.timerHint.textContent = 'ホールド中...';
+                break;
+            case 'ready':
+                elements.timerHint.textContent = '離すと開始';
+                break;
+            case 'inspection':
+                elements.timerHint.textContent = 'インスペクション中';
+                elements.inspectionIndicator.classList.add('active');
+                break;
+            case 'running':
+                elements.timerHint.textContent = '';
+                elements.inspectionIndicator.classList.remove('active');
+                if (state.settings.hideUIWhenTiming) {
+                    elements.app.classList.add('timing-mode');
+                }
+                break;
+        }
+    }
+
+    function startHolding() {
+        if (state.timer.state === 'running') {
+            stopTimer();
+            return;
+        }
+
+        if (state.timer.state !== 'idle' && state.timer.state !== 'inspection') return;
+
+        const wasInspecting = state.timer.state === 'inspection';
+        state.timer.holdStartTime = performance.now();
+
+        if (wasInspecting) {
+            setTimerState('holding');
+            updateTimerDisplay(0);
+        } else {
+            setTimerState('holding');
+            updateTimerDisplay(0);
+        }
+
+        checkHoldComplete(wasInspecting);
+    }
+
+    function checkHoldComplete(wasInspecting) {
+        if (state.timer.state !== 'holding') return;
+
+        const holdDuration = performance.now() - state.timer.holdStartTime;
+
+        if (holdDuration >= state.settings.holdTime) {
+            setTimerState('ready');
+        } else {
+            requestAnimationFrame(() => checkHoldComplete(wasInspecting));
+        }
+    }
+
+    function releaseHold() {
+        if (state.timer.state === 'holding') {
+            setTimerState('idle');
+            updateTimerDisplay(0);
+            return;
+        }
+
+        if (state.timer.state === 'ready') {
+            if (state.settings.inspectionEnabled && state.timer.inspectionStartTime === null) {
+                startInspection();
+            } else {
+                startTimer();
+            }
+        }
+    }
+
+    function startInspection() {
+        state.timer.inspectionStartTime = performance.now();
+        setTimerState('inspection');
+        updateInspection();
+    }
+
+    function updateInspection() {
+        if (state.timer.state !== 'inspection') return;
+
+        const elapsed = (performance.now() - state.timer.inspectionStartTime) / 1000;
+        const remaining = Math.ceil(15 - elapsed);
+
+        if (remaining <= 0) {
+            elements.inspectionTime.textContent = '+2';
+            if (remaining <= -2) {
+                elements.inspectionTime.textContent = 'DNF';
+            }
+        } else {
+            elements.inspectionTime.textContent = remaining;
+        }
+
+        state.timer.animationFrame = requestAnimationFrame(updateInspection);
+    }
+
+    function startTimer() {
+        let penalty = null;
+
+        if (state.timer.inspectionStartTime !== null) {
+            const inspectionElapsed = (performance.now() - state.timer.inspectionStartTime) / 1000;
+            if (inspectionElapsed > 17) {
+                penalty = 'dnf';
+            } else if (inspectionElapsed > 15) {
+                penalty = 'plus2';
+            }
+        }
+
+        state.timer.startTime = performance.now();
+        state.timer.inspectionStartTime = null;
+        state.timer.penalty = penalty;
+
+        if (state.timer.animationFrame) {
+            cancelAnimationFrame(state.timer.animationFrame);
+        }
+
+        setTimerState('running');
+        updateRunningTimer();
+    }
+
+    function updateRunningTimer() {
+        if (state.timer.state !== 'running') return;
+
+        state.timer.elapsed = performance.now() - state.timer.startTime;
+        updateTimerDisplay(state.timer.elapsed);
+        state.timer.animationFrame = requestAnimationFrame(updateRunningTimer);
+    }
+
+    function stopTimer() {
+        if (state.timer.state !== 'running') return;
+
+        if (state.timer.animationFrame) {
+            cancelAnimationFrame(state.timer.animationFrame);
+        }
+
+        const finalTime = performance.now() - state.timer.startTime;
+
+        elements.app.classList.remove('timing-mode');
+        setTimerState('idle');
+        updateTimerDisplay(finalTime);
+
+        // Save the solve
+        const solve = {
+            id: Date.now(),
+            time: finalTime,
+            penalty: state.timer.penalty || null,
+            scramble: elements.scramble.textContent,
+            puzzle: state.currentPuzzle,
+            date: new Date().toISOString()
+        };
+
+        state.times.unshift(solve);
+        saveData();
+        updateStats();
+        renderTimesList();
+        generateNewScramble();
+    }
+
+    // ============================================
+    // Statistics
+    // ============================================
+    function getEffectiveTime(solve) {
+        if (solve.penalty === 'dnf') return Infinity;
+        if (solve.penalty === 'plus2') return solve.time + 2000;
+        return solve.time;
+    }
+
+    function calculateAverage(times, trimmed = false) {
+        if (times.length === 0) return null;
+
+        const effectiveTimes = times.map(getEffectiveTime);
+
+        // Check for DNF
+        const dnfCount = effectiveTimes.filter(t => t === Infinity).length;
+
+        if (trimmed && times.length >= 3) {
+            // For ao5, ao12 etc., remove best and worst
+            if (dnfCount > 1) return Infinity; // More than one DNF in trimmed average = DNF
+
+            const sorted = [...effectiveTimes].sort((a, b) => a - b);
+            const trimCount = Math.ceil(times.length * 0.05) || 1;
+            const trimmedTimes = sorted.slice(trimCount, -trimCount);
+
+            if (trimmedTimes.some(t => t === Infinity)) return Infinity;
+
+            return trimmedTimes.reduce((a, b) => a + b, 0) / trimmedTimes.length;
+        } else {
+            if (dnfCount > 0) return Infinity;
+            return effectiveTimes.reduce((a, b) => a + b, 0) / effectiveTimes.length;
+        }
+    }
+
+    function updateStats() {
+        const times = state.times;
+
+        // Best
+        if (times.length > 0) {
+            const validTimes = times.filter(t => t.penalty !== 'dnf');
+            if (validTimes.length > 0) {
+                const best = Math.min(...validTimes.map(getEffectiveTime));
+                elements.statBest.textContent = formatTime(best);
+            } else {
+                elements.statBest.textContent = 'DNF';
+            }
+        } else {
+            elements.statBest.textContent = '-';
+        }
+
+        // ao5
+        if (times.length >= 5) {
+            const ao5 = calculateAverage(times.slice(0, 5), true);
+            elements.statAo5.textContent = ao5 === Infinity ? 'DNF' : formatTime(ao5);
+        } else {
+            elements.statAo5.textContent = '-';
+        }
+
+        // ao12
+        if (times.length >= 12) {
+            const ao12 = calculateAverage(times.slice(0, 12), true);
+            elements.statAo12.textContent = ao12 === Infinity ? 'DNF' : formatTime(ao12);
+        } else {
+            elements.statAo12.textContent = '-';
+        }
+
+        // Mean
+        if (times.length > 0) {
+            const mean = calculateAverage(times, false);
+            elements.statAvg.textContent = mean === Infinity ? 'DNF' : formatTime(mean);
+        } else {
+            elements.statAvg.textContent = '-';
+        }
+
+        // Count
+        elements.statCount.textContent = times.length;
+    }
+
+    // ============================================
+    // Times List
+    // ============================================
+    function renderTimesList() {
+        if (state.times.length === 0) {
+            elements.timesList.innerHTML = '<p class="no-times">まだタイムがありません</p>';
+            return;
+        }
+
+        const html = state.times.map((solve, index) => {
+            const effectiveTime = getEffectiveTime(solve);
+            const displayTime = formatTime(solve.time);
+            const penaltyClass = solve.penalty === 'dnf' ? 'dnf' : (solve.penalty === 'plus2' ? 'plus2' : '');
+            const penaltyText = solve.penalty === 'plus2' ? '+2' : '';
+
+            return `
+                <div class="time-item" data-id="${solve.id}">
+                    <span class="time-index">${state.times.length - index}.</span>
+                    <span class="time-value ${penaltyClass}">
+                        ${solve.penalty === 'dnf' ? 'DNF' : displayTime}
+                        ${penaltyText ? `<span class="time-penalty">${penaltyText}</span>` : ''}
+                    </span>
+                    <div class="time-actions">
+                        <button class="time-action-btn ${solve.penalty === 'plus2' ? 'active' : ''}"
+                                data-action="plus2" title="+2ペナルティ">+2</button>
+                        <button class="time-action-btn ${solve.penalty === 'dnf' ? 'active' : ''}"
+                                data-action="dnf" title="DNF">DNF</button>
+                        <button class="time-action-btn delete" data-action="delete" title="削除">✕</button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        elements.timesList.innerHTML = html;
+    }
+
+    function handleTimeAction(solveId, action) {
+        const solve = state.times.find(t => t.id === solveId);
+        if (!solve) return;
+
+        if (action === 'delete') {
+            state.times = state.times.filter(t => t.id !== solveId);
+        } else if (action === 'plus2') {
+            solve.penalty = solve.penalty === 'plus2' ? null : 'plus2';
+        } else if (action === 'dnf') {
+            solve.penalty = solve.penalty === 'dnf' ? null : 'dnf';
+        }
+
+        saveData();
+        updateStats();
+        renderTimesList();
+    }
+
+    // ============================================
+    // Scramble
+    // ============================================
+    function generateNewScramble() {
+        const scramble = scrambleGenerator.generate(state.currentPuzzle);
+        elements.scramble.textContent = scramble;
+    }
+
+    // ============================================
+    // Settings
+    // ============================================
+    function openSettings() {
+        elements.settingsModal.classList.add('active');
+    }
+
+    function closeSettings() {
+        elements.settingsModal.classList.remove('active');
+    }
+
+    function applySettings() {
+        state.settings.inspectionEnabled = elements.inspectionEnabled.checked;
+        state.settings.hideUIWhenTiming = elements.hideUIWhenTiming.checked;
+        state.settings.holdTime = parseInt(elements.holdTime.value, 10);
+        state.settings.theme = elements.themeSelect.value;
+
+        document.documentElement.setAttribute('data-theme', state.settings.theme);
+        saveData();
+    }
+
+    function loadSettingsToUI() {
+        elements.inspectionEnabled.checked = state.settings.inspectionEnabled;
+        elements.hideUIWhenTiming.checked = state.settings.hideUIWhenTiming;
+        elements.holdTime.value = state.settings.holdTime;
+        elements.themeSelect.value = state.settings.theme;
+        document.documentElement.setAttribute('data-theme', state.settings.theme);
+    }
+
+    // ============================================
+    // Storage
+    // ============================================
+    function saveData() {
+        const data = {
+            times: state.times,
+            settings: state.settings,
+            currentPuzzle: state.currentPuzzle
+        };
+        localStorage.setItem('cubeTimerData', JSON.stringify(data));
+    }
+
+    function loadData() {
+        try {
+            const data = JSON.parse(localStorage.getItem('cubeTimerData'));
+            if (data) {
+                state.times = data.times || [];
+                state.settings = { ...state.settings, ...data.settings };
+                state.currentPuzzle = data.currentPuzzle || '333';
+            }
+        } catch (e) {
+            console.error('Failed to load data:', e);
+        }
+    }
+
+    // ============================================
+    // Event Handlers
+    // ============================================
+    function handleKeyDown(e) {
+        // Ignore if modal is open or in input field
+        if (elements.settingsModal.classList.contains('active')) return;
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+
+        if (e.code === 'Space') {
+            e.preventDefault();
+            if (!e.repeat) {
+                startHolding();
+            }
+        } else if (e.code === 'Escape') {
+            if (state.timer.state === 'running') {
+                // Cancel solve
+                if (state.timer.animationFrame) {
+                    cancelAnimationFrame(state.timer.animationFrame);
+                }
+                elements.app.classList.remove('timing-mode');
+                setTimerState('idle');
+                updateTimerDisplay(0);
+            } else if (state.timer.state === 'inspection') {
+                if (state.timer.animationFrame) {
+                    cancelAnimationFrame(state.timer.animationFrame);
+                }
+                state.timer.inspectionStartTime = null;
+                setTimerState('idle');
+                updateTimerDisplay(0);
+            }
+        }
+    }
+
+    function handleKeyUp(e) {
+        if (e.code === 'Space') {
+            e.preventDefault();
+            releaseHold();
+        }
+    }
+
+    function handleTouchStart(e) {
+        if (elements.settingsModal.classList.contains('active')) return;
+        if (e.target.closest('.times-section') ||
+            e.target.closest('.header') ||
+            e.target.closest('.scramble-section') ||
+            e.target.closest('.stats-section')) return;
+
+        e.preventDefault();
+        startHolding();
+    }
+
+    function handleTouchEnd(e) {
+        if (state.timer.state === 'holding' || state.timer.state === 'ready') {
+            e.preventDefault();
+            releaseHold();
+        } else if (state.timer.state === 'running') {
+            e.preventDefault();
+            stopTimer();
+        }
+    }
+
+    function handleTimesListClick(e) {
+        const actionBtn = e.target.closest('.time-action-btn');
+        if (!actionBtn) return;
+
+        const timeItem = actionBtn.closest('.time-item');
+        const solveId = parseInt(timeItem.dataset.id, 10);
+        const action = actionBtn.dataset.action;
+
+        handleTimeAction(solveId, action);
+    }
+
+    // ============================================
+    // Initialization
+    // ============================================
+    function init() {
+        // Load saved data
+        loadData();
+
+        // Apply settings to UI
+        loadSettingsToUI();
+
+        // Set initial puzzle
+        elements.puzzleType.value = state.currentPuzzle;
+
+        // Generate initial scramble
+        generateNewScramble();
+
+        // Update stats and times list
+        updateStats();
+        renderTimesList();
+
+        // Event listeners - keyboard
+        document.addEventListener('keydown', handleKeyDown);
+        document.addEventListener('keyup', handleKeyUp);
+
+        // Event listeners - touch
+        document.addEventListener('touchstart', handleTouchStart, { passive: false });
+        document.addEventListener('touchend', handleTouchEnd, { passive: false });
+
+        // Event listeners - UI controls
+        elements.newScrambleBtn.addEventListener('click', generateNewScramble);
+
+        elements.puzzleType.addEventListener('change', (e) => {
+            state.currentPuzzle = e.target.value;
+            generateNewScramble();
+            saveData();
+        });
+
+        elements.clearSessionBtn.addEventListener('click', () => {
+            if (confirm('セッションをクリアしますか？全てのタイムが削除されます。')) {
+                state.times = [];
+                saveData();
+                updateStats();
+                renderTimesList();
+            }
+        });
+
+        // Event listeners - settings
+        elements.settingsBtn.addEventListener('click', openSettings);
+        elements.closeSettingsBtn.addEventListener('click', closeSettings);
+        elements.modalBackdrop.addEventListener('click', closeSettings);
+
+        elements.inspectionEnabled.addEventListener('change', applySettings);
+        elements.hideUIWhenTiming.addEventListener('change', applySettings);
+        elements.holdTime.addEventListener('change', applySettings);
+        elements.themeSelect.addEventListener('change', applySettings);
+
+        // Event listeners - times list
+        elements.timesList.addEventListener('click', handleTimesListClick);
+
+        // Prevent context menu on long press (mobile)
+        document.addEventListener('contextmenu', (e) => {
+            if (state.timer.state !== 'idle') {
+                e.preventDefault();
+            }
+        });
+
+        console.log('Cube Timer initialized');
+    }
+
+    // Start the app
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+})();
+    </script>
 </body>
 </html>
